@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour {
     public static GameObject[] autresAgent;
-    public static int nombreDeCoup;
+    
+    
     public int sizeX = 10;
     public int sizeY = 10;
 
@@ -18,6 +19,7 @@ public class GameManager : MonoBehaviour {
     {
         public float debut;
         public float fin;
+        public GameObject reserveur;
 
         public bool isOccuped(Temporalite otherTemp)
         {
@@ -32,25 +34,19 @@ public class GameManager : MonoBehaviour {
     /**
      * Renvoi le premier Noeud occupé, null si tout est bon
      */
-    public static AStar.Noeud reserveCases(List<KeyValuePair<AStar.Noeud,Temporalite>> casesAReserver)
+    public static KeyValuePair<AStar.Noeud, Temporalite> reserveCases(List<KeyValuePair<AStar.Noeud, Temporalite>> casesAReserver)
     {
-
-        foreach (KeyValuePair<AStar.Noeud, Temporalite> cr in casesReserve)
+        foreach (KeyValuePair<AStar.Noeud, Temporalite> car in casesAReserver)
         {
-            foreach (KeyValuePair<AStar.Noeud,Temporalite> car in casesAReserver)
-            {
-                if (cr.Value.isOccuped(car.Value))
-                {
-                    return car.Key;
-                }
-            }
+            if (casesReserve.ContainsKey(car.Key) && casesReserve[car.Key].isOccuped(car.Value))
+                return car;
         }
 
         foreach (KeyValuePair<AStar.Noeud, Temporalite> car in casesAReserver)
         {
             casesReserve.Add(car.Key,car.Value);
         }
-        return null;
+        return new KeyValuePair<AStar.Noeud, Temporalite>();
     }
 
     
@@ -109,13 +105,26 @@ public class GameManager : MonoBehaviour {
             else
             {
                 Time.timeScale = 0;
-            
             }
         }
 
-        GUI.TextArea(new Rect(10, 10, 100, 30), nombreDeCoup.ToString());
+        string msgAgent = "";
+        float nbPasTotaux = 0;
+        float scoreGeneral = 0;
+        foreach (GameObject o in autresAgent)
+        {
+            Agent a = o.GetComponent<Agent>();
+            nbPasTotaux += a.nbDePas;
+            scoreGeneral += a.score;
+            msgAgent += "Agent" + a.myId + " " + o.transform.position + "\n";
+            msgAgent += "NbPas/NbPasMinimum :" + a.nbDePas + "/" + a.nbDePasMinimum + "\nScore :" + a.score + "\n";
+        }
+        GUI.TextArea(new Rect(10, 70, 170, 40 * autresAgent.Length), msgAgent);
 
-        GUI.TextArea(new Rect(10, 60, 100, 30), (Time.fixedTime).ToString());
+
+        GUI.TextArea(new Rect(10, 10, 110, 60), "nbCoup : " + nbPasTotaux.ToString() + "\nScoreGe : " + scoreGeneral + "\nTemps :" + (Time.fixedTime).ToString());
+
+        
 
       
 

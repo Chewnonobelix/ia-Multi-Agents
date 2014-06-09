@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class AgentV2 : Agent
 {
 
-    public bool strategieAgentSourd = false;
+    public bool strategieAgentBloquant = false;
 
     protected override void avancerVersObjectif()
     {
@@ -65,6 +65,7 @@ public class AgentV2 : Agent
                 break;
             }
             Debug.Log(myId + " trouve que " + n.position + " n'est pas viable");
+            CheminAPrendre = null;
         }
 
 
@@ -96,17 +97,57 @@ public class AgentV2 : Agent
     }
 
 
+    private void negociation(Agent genant, AStar.Noeud blocus)
+    {
+        // combien prend tu sans cette case ?
+        // TODO Gerer si noeud de départ ou d'arriver est le noeud blocus
+        Vector3 saveBlocusPosition = blocus.position;
+        blocus.position.y = float.MaxValue;
 
 
 
+        // Combien je prend sans cette case
+
+
+        // compare resultat et agi
+    }
+
+    public bool firstASTAR = false;
     protected override AStar.Noeud findNextMovementAStar(Vector3 origine, Vector3 destination)
     {
       
 
-       // if (CheminAPrendre == null)
-     //   {
+        if (CheminAPrendre == null)
+        {
             CheminAPrendre = AStar.aStar(AStar.findCase(transform.position), AStar.findCase(objectif.transform.position));
-     //   }
+            if (!firstASTAR)
+            {
+                
+                nbDePasMinimum = CheminAPrendre.Count;
+                firstASTAR = true;
+            }
+           
+            
+          /*  List<KeyValuePair<AStar.Noeud,  GameManager.Temporalite>> casesAReserver = new List<KeyValuePair<AStar.Noeud,GameManager.Temporalite>>();
+
+            float time=0;
+            foreach (AStar.Noeud n in CheminAPrendre)
+            {
+                GameManager.Temporalite newT = new GameManager.Temporalite();
+                newT.debut = time - timeForNextStep;
+                time += timeForNextStep;
+                newT.fin = time + timeForNextStep;
+                newT.reserveur = gameObject;
+
+                casesAReserver.Add(new KeyValuePair<AStar.Noeud,  GameManager.Temporalite>(n, newT));
+            }
+            KeyValuePair<AStar.Noeud,GameManager.Temporalite> caseAProbleme = GameManager.reserveCases(casesAReserver);
+            Debug.Log(myId + " case génante " + GameManager.reserveCases(casesAReserver).Key.position);
+
+            if (caseAProbleme.Key != null)
+                negociation(caseAProbleme.Value.reserveur.GetComponent<Agent>(), caseAProbleme.Key);
+            */
+        }
 
 
         AStar.Noeud nextMov;
@@ -124,8 +165,10 @@ public class AgentV2 : Agent
 
             if (CheminAPrendre.Count == 0)
             {
+                // First arrive
                 Debug.Log(myId + " est arrivé");
                 nextMov = AStar.findCase(transform.position);
+                score = nbDePasMinimum / nbDePas * 100.0f;
             }
             else
                 nextMov = CheminAPrendre[0];
@@ -168,8 +211,19 @@ public class AgentV2 : Agent
 
     public override void postMessage(Message m)
     {
-        if (!strategieAgentSourd)
+        if (!strategieAgentBloquant)
             messages.Add(m);
+        else
+        {
+            if (!m.expediteur.GetComponent<AgentV2>().strategieAgentBloquant)
+            {
+                Message n = new Message();
+                n.expediteur = gameObject;
+                
+                n.p.caseAQuitter.Add(m.expediteur.transform.position);
+                m.expediteur.GetComponent<AgentV2>().postMessage(n);
+            }
+        }
     }
 
 }

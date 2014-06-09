@@ -11,6 +11,10 @@ public abstract class Agent : MonoBehaviour {
     public float DistanceUnPas = 1;
     public float timeForNextStep = 1;
 
+    public float nbDePas = 0;
+    public float nbDePasMinimum;
+    public float score = 0;
+
     protected List<Message> messages = new List<Message>();
 
     protected float timeLastStep = 0;
@@ -19,6 +23,8 @@ public abstract class Agent : MonoBehaviour {
 
     static int idcount = 0;
     public int myId;
+
+
 
     // Update is called once per frame
     void FixedUpdate()
@@ -71,9 +77,10 @@ public abstract class Agent : MonoBehaviour {
     
 
   //  bool actionPossible = false;
-
+    
 	// Use this for initialization
 	void Start () {
+
        
 
         myId = idcount;
@@ -145,11 +152,14 @@ public abstract class Agent : MonoBehaviour {
     {
         if (transform.position != prochainePlace)
         {
+
+
             prochainePlace.x = Mathf.Round(prochainePlace.x);
             prochainePlace.y = Mathf.Round(prochainePlace.y);
             prochainePlace.z = Mathf.Round(prochainePlace.z);
 
-            GameManager.nombreDeCoup = GameManager.nombreDeCoup + 1;
+            
+            nbDePas++;
             transform.position = prochainePlace;
            
           
